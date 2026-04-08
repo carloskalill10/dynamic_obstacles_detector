@@ -1,0 +1,5 @@
+<launch>
+    <node pkg="dynamic_obstacles_detector" type="dynamic_detector_node.py" name="dynamic_detector_node" output="screen">
+        
+        </node>
+</launch>

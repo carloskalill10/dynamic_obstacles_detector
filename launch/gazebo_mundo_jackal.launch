@@ -1,0 +1,17 @@
+<launch>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="/home/dev/catkin_ws/src/dynamic_obstacles_detector/src/DynaBARN/DynaBARN_worlds_60/world_0.world"/>
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+  </include>
+
+  <env name="JACKAL_LASER" value="1" />
+  <include file="$(find jackal_description)/launch/description.launch">
+    <arg name="config" value="front_laser" />
+  </include>
+
+  <include file="$(find jackal_control)/launch/control.launch" />
+
+  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model"
+        args="-urdf -model jackal -param robot_description -x -2.0 -y 1.5 -z 0.2" />
+</launch>
