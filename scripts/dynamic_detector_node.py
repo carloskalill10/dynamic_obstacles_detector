@@ -6,7 +6,7 @@ from nav_msgs.msg import Odometry
 from visualization_msgs.msg import Marker, MarkerArray
 from scipy.optimize import least_squares, linear_sum_assignment
 from sklearn.cluster import DBSCAN
-from tf.transformations import euler_from_quaternion
+
 import tf2_ros
 import tf2_geometry_msgs
 from geometry_msgs.msg import Point, Point32
@@ -134,7 +134,8 @@ class LidarCircleFittingDetector:
             tx = transform.transform.translation.x
             ty = transform.transform.translation.y
             q = transform.transform.rotation
-            _, _, tyaw = euler_from_quaternion([q.x, q.y, q.z, q.w])
+            #_, _, tyaw = euler_from_quaternion([q.x, q.y, q.z, q.w])
+            tyaw = 0
             curr_pose = [tx, ty, tyaw]
             
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
