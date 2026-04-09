@@ -72,8 +72,8 @@ class LidarCircleFittingDetector:
         
         # Parametros
         self.threshold = 0.2
-        self.max_dist_detect = 3
-        self.max_limit_dist = 1.0
+        self.max_dist_detect = 6
+        self.max_limit_dist = 2.0
         self.raio_do_robo = 0.35 #como a lidar fica dentro do raio do robo, deve-se considerar como area minima de deteccao o raio do robo.
         self.min_speed_detection =0.15 #minima velociade para que o obstaculo seja detectado
 
@@ -306,7 +306,7 @@ class LidarCircleFittingDetector:
                 track.moving_time = 0.0
                 
             
-            if track.moving_time > 0.5: #para 1 seg
+            if track.moving_time > 0.8: #para 1 seg
 
                 has_dinamic = True
 
