@@ -134,8 +134,7 @@ class LidarCircleFittingDetector:
             tx = transform.transform.translation.x
             ty = transform.transform.translation.y
             q = transform.transform.rotation
-            #_, _, tyaw = euler_from_quaternion([q.x, q.y, q.z, q.w])
-            tyaw = 0
+            tyaw = yaw_from_quaternion([q.x, q.y, q.z, q.w])
             curr_pose = [tx, ty, tyaw]
             
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
@@ -455,6 +454,23 @@ class LidarCircleFittingDetector:
         
         marker.lifetime = rospy.Duration(0.2)
         return marker
+
+def yaw_from_quaternion(qx, qy, qz, qw):
+    """
+    Compute yaw (rotation around Z axis) from quaternion.
+
+    Args:
+        qx, qy, qz, qw: quaternion components
+
+    Returns:
+        yaw (in radians)
+    """
+    # Yaw (Z-axis rotation)
+    siny_cosp = 2.0 * (qw * qz + qx * qy)
+    cosy_cosp = 1.0 - 2.0 * (qy * qy + qz * qz)
+
+    yaw = math.atan2(siny_cosp, cosy_cosp)
+    return yaw
 
 if __name__ == '__main__':
     try:
