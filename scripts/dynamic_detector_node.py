@@ -134,7 +134,7 @@ class LidarCircleFittingDetector:
             tx = transform.transform.translation.x
             ty = transform.transform.translation.y
             q = transform.transform.rotation
-            tyaw = yaw_from_quaternion([q.x, q.y, q.z, q.w])
+            tyaw = yaw_from_quaternion(q.x, q.y, q.z, q.w)
             curr_pose = [tx, ty, tyaw]
             
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
