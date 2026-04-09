@@ -490,6 +490,8 @@ class LidarCircleFittingDetector:
         marker.lifetime = rospy.Duration(0.2)
         return marker
 
+
+
 if __name__ == '__main__':
     try:
         detector = LidarCircleFittingDetector()
