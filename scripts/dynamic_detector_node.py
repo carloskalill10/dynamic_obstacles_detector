@@ -6,14 +6,49 @@ from nav_msgs.msg import Odometry
 from visualization_msgs.msg import Marker, MarkerArray
 from scipy.optimize import least_squares, linear_sum_assignment
 from sklearn.cluster import DBSCAN
-from tf.transformations import euler_from_quaternion
 import tf2_ros
 import tf2_geometry_msgs
 from geometry_msgs.msg import Point, Point32
 import math 
-import tf 
 from costmap_converter.msg import ObstacleArrayMsg, ObstacleMsg
 from std_msgs.msg import Bool
+
+
+#Converte quaternion em angulos de Euler (roll, pitch, yaw)
+def get_euler_from_quaternion(x, y, z, w):
+    
+    t0 = +2.0 * (w * x + y * z)
+    t1 = +1.0 - 2.0 * (x * x + y * y)
+    roll_x = math.atan2(t0, t1)
+
+    t2 = +2.0 * (w * y - z * x)
+    t2 = +1.0 if t2 > +1.0 else t2
+    t2 = -1.0 if t2 < -1.0 else t2
+    pitch_y = math.asin(t2)
+
+    t3 = +2.0 * (w * z + x * y)
+    t4 = +1.0 - 2.0 * (y * y + z * z)
+    yaw_z = math.atan2(t3, t4)
+
+    return roll_x, pitch_y, yaw_z
+
+#Converte angulos de Euler (roll, pitch, yaw) em quaternion [x, y, z, w]
+def get_quaternion_from_euler(roll, pitch, yaw):
+
+    cy = math.cos(yaw * 0.5)
+    sy = math.sin(yaw * 0.5)
+    cp = math.cos(pitch * 0.5)
+    sp = math.sin(pitch * 0.5)
+    cr = math.cos(roll * 0.5)
+    sr = math.sin(roll * 0.5)
+
+    qx = sr * cp * cy - cr * sp * sy
+    qy = cr * sp * cy + sr * cp * sy
+    qz = cr * cp * sy - sr * sp * cy
+    qw = cr * cp * cy + sr * sp * sy
+
+    return [qx, qy, qz, qw]
+
 
 class Track:
     def __init__(self, track_id, x, y):
@@ -72,7 +107,7 @@ class LidarCircleFittingDetector:
         
         # Parametros
         self.threshold = 0.2
-        self.max_dist_detect = 6
+        self.max_dist_detect = 8
         self.max_limit_dist = 2.0
         self.raio_do_robo = 0.35 #como a lidar fica dentro do raio do robo, deve-se considerar como area minima de deteccao o raio do robo.
         self.min_speed_detection =0.15 #minima velociade para que o obstaculo seja detectado
@@ -134,7 +169,7 @@ class LidarCircleFittingDetector:
             tx = transform.transform.translation.x
             ty = transform.transform.translation.y
             q = transform.transform.rotation
-            _, _, tyaw = euler_from_quaternion([q.x, q.y, q.z, q.w])
+            _, _, tyaw = get_euler_from_quaternion(q.x, q.y, q.z, q.w)
             curr_pose = [tx, ty, tyaw]
             
         except (tf2_ros.LookupException, tf2_ros.ConnectivityException, tf2_ros.ExtrapolationException) as e:
@@ -306,7 +341,7 @@ class LidarCircleFittingDetector:
                 track.moving_time = 0.0
                 
             
-            if track.moving_time > 0.8: #para 1 seg
+            if track.moving_time > 0.6: #para 1 seg
 
                 has_dinamic = True
 
@@ -333,11 +368,11 @@ class LidarCircleFittingDetector:
                 
                 # 3. Orientacao do vetor (Necessario para a cinematica do TEB)
                 yaw = math.atan2(vy_est, vx_est)
-                q = tf.transformations.quaternion_from_euler(0, 0, yaw)
-                obs_msg.orientation.x = q[0]
-                obs_msg.orientation.y = q[1]
-                obs_msg.orientation.z = q[2]
-                obs_msg.orientation.w = q[3]
+                q_math = get_quaternion_from_euler(0, 0, yaw)
+                obs_msg.orientation.x = q_math[0]
+                obs_msg.orientation.y = q_math[1]
+                obs_msg.orientation.z = q_math[2]
+                obs_msg.orientation.w = q_math[3]
                 
                 obs_array_msg.obstacles.append(obs_msg)
 
